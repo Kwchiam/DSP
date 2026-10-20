@@ -1,0 +1,114 @@
+cubes:
+  - name: sales_forecast
+    sql_table: dbo.fact_sales_forecast
+
+    measures:
+      # --- Core Aggregations ---
+      - name: total_revenue
+        type: sum
+        sql: Actual_Revenue
+        format: currency
+
+      - name: historical_actual_revenue
+        type: sum
+        sql: "CASE WHEN Is_Forecast_Record = 0 THEN Actual_Revenue ELSE 0 END"
+        format: currency
+
+      - name: ai_forecasted_revenue
+        type: sum
+        sql: "CASE WHEN Is_Forecast_Record = 1 THEN Actual_Revenue ELSE 0 END"
+        format: currency
+
+      - name: total_profit
+        type: sum
+        sql: Profit
+        format: currency
+
+      - name: total_cost
+        type: sum
+        sql: Cost
+        format: currency
+
+      - name: total_marketing_spend
+        type: sum
+        sql: Marketing_Spend
+        format: currency
+
+      - name: total_units_sold
+        type: sum
+        sql: Units_Sold
+
+      - name: order_count
+        type: count
+        sql: Order_ID
+
+      # --- Ratios & Derived Measures ---
+      - name: profit_margin_pct
+        type: number
+        sql: "{total_profit} * 100.0 / NULLIF({total_revenue}, 0)"
+
+      - name: marketing_roi_pct
+        type: number
+        sql: "{total_profit} * 100.0 / NULLIF({total_marketing_spend}, 0)"
+
+      - name: average_order_value
+        type: number
+        sql: "{total_revenue} / NULLIF({order_count}, 0)"
+        format: currency
+
+      - name: average_selling_price
+        type: number
+        sql: "{total_revenue} / NULLIF({total_units_sold}, 0)"
+        format: currency
+
+      - name: unit_cost_avg
+        type: number
+        sql: "{total_cost} / NULLIF({total_units_sold}, 0)"
+        format: currency
+
+      - name: profit_per_unit
+        type: number
+        sql: "{total_profit} / NULLIF({total_units_sold}, 0)"
+        format: currency
+
+      - name: marketing_cost_per_order
+        type: number
+        sql: "{total_marketing_spend} / NULLIF({order_count}, 0)"
+        format: currency
+
+    dimensions:
+      - name: order_date
+        type: time
+        sql: CAST(Order_Date AS DATETIME2)
+
+      - name: region
+        type: string
+        sql: Region
+
+      - name: country
+        type: string
+        sql: Country
+
+      - name: product_category
+        type: string
+        sql: Product_Category
+
+      - name: product_name
+        type: string
+        sql: Product_Name
+
+      - name: customer_segment
+        type: string
+        sql: Customer_Segment
+
+      - name: sales_representative
+        type: string
+        sql: Sales_Representative
+
+      - name: season
+        type: string
+        sql: Season
+
+      - name: is_forecast
+        type: boolean
+        sql: Is_Forecast_Record
